@@ -1,0 +1,16 @@
+{
+  "name": "aws-kinesis-example",
+  "version": "0.0.1",
+  "description": "Defines and monitors a streaming platform for event sourcing",
+  "main": "src/kinesis/handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.378.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.10.0"
+  }
+}

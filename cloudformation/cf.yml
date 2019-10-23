@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Kinesis example
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Service:
+    Type: String
+  Environment:
+    Type: String
+    Default: dev
+  Region:
+    Type: String
+    Default: us-west-2
+
+Globals:
+  Function:
+    Runtime: nodejs8.10
+    Timeout: 300
+    MemorySize: 128
+
+Resources:
+
+  Logger:
+    Type: AWS::Serverless::Function
+    Description: Stream logger
+    Properties:
+      FunctionName: !Sub ${Service}-logger
+      CodeUri: ../src/kinesis
+      Handler: handler.logger
+      Role:
+        Fn::GetAtt: [ StreamingPlatformWriter, Arn ]
+
+  MyEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn:
+        Fn::Join:
+          - ""
+          -
+            - "arn:aws:kinesis:"
+            -
+              Ref: "AWS::Region"
+            - ":"
+            -
+              Ref: "AWS::AccountId"
+            - ":stream/"
+            -
+              Ref: "StreamingPlatform"
+      FunctionName:
+        Fn::GetAtt:
+          - "Logger"
+          - "Arn"
+      StartingPosition: "TRIM_HORIZON"
+
+  Pinger:
+    Type: AWS::Serverless::Function
+    Description: Stream pinger
+    Properties:
+      FunctionName: !Sub ${Service}-pinger
+      CodeUri: ../src/kinesis
+      Handler: handler.pinger
+      Role:
+        Fn::GetAtt: [ StreamingPlatformWriter, Arn ]
+
+  StreamingPlatform:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: StreamingPlatform
+      RetentionPeriodHours: 24
+      ShardCount: 1
+
+  StreamingPlatformWriter:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      RoleName: StreamingPlatformWriter
+      Policies:
+        - PolicyName: WriteToStream
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -  Effect: Allow
+                 Action:
+                   - 'kinesis:GetRecords'
+                   - 'kinesis:GetShardIterator'
+                   - 'kinesis:ListStreams'
+                   - 'kinesis:DescribeStream'
+                   - 'kinesis:PutRecord'
+                   - 'kinesis:PutRecords'
+                 Resource:
+                   - Fn::GetAtt: [ StreamingPlatform, Arn ]
+        - PolicyName: AWSLambdaBasicExecutionRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: "*"
+
+  LogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub /aws/lambda/streaming-platform-logger
