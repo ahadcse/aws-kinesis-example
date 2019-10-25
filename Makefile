@@ -5,7 +5,7 @@ SERVICE ?= aws-kinesis-example
 AWS_REGION ?= eu-west-1
 BITBUCKET_BUILD_NUMBER ?= localbuild
 
-ARTIFACTS_BUCKET:=artifactory-$(ENVIRONMENT)
+ARTIFACTS_BUCKET:=artifactory-deployment-$(ENVIRONMENT)
 ARTIFACTS_PREFIX:=$(SERVICE)
 
 cfn-package = mkdir -p cloudformation/dist && \
