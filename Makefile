@@ -5,8 +5,6 @@ SERVICE ?= aws-kinesis-example
 AWS_REGION ?= eu-west-1
 BITBUCKET_BUILD_NUMBER ?= localbuild
 
-# Following bucket should be available. Otherwise deployment will not work. We can add this to CloudFormation template and deploy that before actial deployment.
-# TODO: Add deployment bucket to template
 ARTIFACTS_BUCKET:=artifactory-$(ENVIRONMENT)
 ARTIFACTS_PREFIX:=$(SERVICE)
 
@@ -28,6 +26,19 @@ cfn-deploy = aws cloudformation deploy \
 		Service=$(SERVICE) \
 		Environment=$(ENVIRONMENT) \
 		Region=${AWS_REGION}
+
+cfn-deploy-s3 = aws cloudformation deploy \
+	--template-file cloudformation/dist/s3.yml \
+	--stack-name $(SERVICE)-s3 \
+	--region $(AWS_REGION) \
+	--tags Environment=$(ENVIRONMENT) \
+	--parameter-overrides \
+		BucketName=$(ARTIFACTS_BUCKET)
+
+.PHONY: deployment_bucket
+deployment_bucket:
+	$(call cfn-package,s3)
+	$(call cfn-deploy-s3)
 
 .PHONY: deploy
 deploy:
