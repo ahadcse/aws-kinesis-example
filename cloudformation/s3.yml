@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: aws-rds-mysql - S3 Bucket
+Description: Deployment S3 Bucket
 
 Parameters:
   BucketName:
