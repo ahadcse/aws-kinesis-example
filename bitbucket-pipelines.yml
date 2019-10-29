@@ -1,0 +1,55 @@
+image: node:8.10-alpine
+pipelines:
+  default:
+    - step:
+        name: Run tests
+        trigger: automatic
+        caches:
+          - node
+        script:
+          - export ENVIRONMENT=dev
+          - apk add --no-cache bash
+
+          - make ci
+
+    - step:
+        name: Deploy to dev
+        trigger: manual
+        deployment: dev
+        caches:
+          - node
+        script:
+          - export ENVIRONMENT=dev
+          - apk add --no-cache bash
+
+          - make install_production
+          - make deployment_bucket
+          - make deploy
+
+    - step:
+        name: Deploy to test
+        trigger: manual
+        deployment: test
+        caches:
+          - node
+        script:
+          - export ENVIRONMENT=test
+          - apk add --no-cache bash
+
+          - make install_production
+          - make deployment_bucket
+          - make deploy
+
+    - step:
+        name: Deploy to Prod
+        trigger: manual
+        deployment: production
+        caches:
+          - node
+        script:
+          - export ENVIRONMENT=prod
+          - apk add --no-cache bash
+
+          - make install_production
+          - make deployment_bucket
+          - make deploy

@@ -76,4 +76,4 @@ prune:
 		([ -d $$f ] && cd "$$f" && npm prune --production) \
   done;
 
-ci: install lint prune
+ci: install prune
