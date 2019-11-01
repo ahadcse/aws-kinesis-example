@@ -13,7 +13,7 @@ const decodeData = (record) => {
 }
 
 const logger = async (event) => {
-  console.log(`event: ${JSON.stringify(event)}`)
+  console.log(`logger event: ${JSON.stringify(event)}`)
   const streamData = []
   event.Records.forEach((record) => {
     const name = getStreamName(record)
@@ -28,7 +28,7 @@ const logger = async (event) => {
 }
 
 const pinger = async (event) => {
-  console.log(`pinger event: ${JSON.stringify(event)}`, 'handler')
+  console.log(`pinger event: ${JSON.stringify(event)}`)
   const time = (new Date()).toISOString()
   const params = {
     Data: JSON.stringify({ ping: 'ping', time }),
