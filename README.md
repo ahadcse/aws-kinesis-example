@@ -11,3 +11,4 @@ Make command prompt should be available. Following is the command:
 
 ## TODO: 
 - bitbucket-pipelines
+- test
